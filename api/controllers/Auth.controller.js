@@ -77,52 +77,102 @@ export const Login = async (req,res,next) =>{
 
 
 
-export const GoogleLogin = async (req,res,next) =>{
+// export const GoogleLogin = async (req,res,next) =>{
 
-    try {
-        const {name, email, avatar} = req.body
-        let user
-        user = await User.findOne({ email })
-        if (!user) {
-            // create new user
-            const password = Math.random().toString()
-            const hashedPassword = bcryptjs.hashSync(password)
-            const newUser = new User({
-                name,email,password: hashedPassword,avatar
-            })
+//     try {
+//         const {name, email, avatar} = req.body
+//         let user
+//         user = await User.findOne({ email })
+//         if (!user) {
+//             // create new user
+//             const password = Math.random().toString()
+//             const hashedPassword = bcryptjs.hashSync(password)
+//             const newUser = new User({
+//                 name,email,password: hashedPassword,avatar
+//             })
 
-            user = await newUser.save()
-        }
+//             user = await newUser.save()
+//         }
 
 
-        const token = jwt.sign({
-            _id: user._id,
-            name:user.name,
-            email:user.email,
-            avatar:user.avatar
-        },process.env.JWT_SECRET)
+//         const token = jwt.sign({
+//             _id: user._id,
+//             name:user.name,
+//             email:user.email,
+//             avatar:user.avatar
+//         },process.env.JWT_SECRET)
 
-        res.cookie('access_token', token, {
-            httpOnly:true,
-            secure:process.env.NODE_ENV ==='production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
-            path:'/'
-        })
+//         res.cookie('access_token', token, {
+//             httpOnly:true,
+//             secure:process.env.NODE_ENV ==='production',
+//             sameSite: process.env.NODE_ENV === 'production' ? 'none' : "strict",
+//             path:'/'
+//         })
 
-        const newUser = user.toObject({ getters:true})
-        delete newUser.password
-        res.status(200).json({
-            success: true,
-            user:newUser,
-            message:"Login successful."
-        })
-    }catch(error) {
-        next(handleError(500, error.message))
+//         const newUser = user.toObject({ getters:true})
+//         delete newUser.password
+//         res.status(200).json({
+//             success: true,
+//             user:newUser,
+//             message:"Login successful."
+//         })
+//     }catch(error) {
+//         next(handleError(500, error.message))
+//     }
+
+
+
+// }
+
+
+export const GoogleLogin = async (req, res, next) => {
+  try {
+    const { name, email, avatar } = req.body;
+
+    if (!name || !email || !avatar) {
+      return res.status(400).json({ success: false, message: 'Missing required fields.' });
     }
 
+    let user = await User.findOne({ email });
 
+    if (!user) {
+      const password = Math.random().toString();
+      const hashedPassword = bcryptjs.hashSync(password);
 
-}
+      const newUser = new User({ name, email, password: hashedPassword, avatar });
+      user = await newUser.save();
+    }
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      },
+      process.env.JWT_SECRET
+    );
+
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      path: '/',
+    });
+
+    const sanitizedUser = user.toObject({ getters: true });
+    delete sanitizedUser.password;
+
+    res.status(200).json({
+      success: true,
+      user: sanitizedUser,
+      message: 'Login successful.',
+    });
+  } catch (error) {
+    console.error('Google Login Error:', error); // helpful for Vercel logs
+    next(handleError(500, error.message));
+  }
+};
 
 export const Logout = async (req,res,next) =>{
 
@@ -146,3 +196,5 @@ export const Logout = async (req,res,next) =>{
 
 
 }
+
+
