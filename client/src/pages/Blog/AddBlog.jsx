@@ -44,7 +44,7 @@ const AddBlog = () => {
    const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
-        category:'',
+        category:"",
         title:"",
         slug: "",
         blogContent:"",
@@ -117,11 +117,11 @@ const AddBlog = () => {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Category</FormLabel>
                   <FormControl>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Category" />
+                          <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
                           {categoryData && categoryData.category.length > 0 && 
@@ -191,7 +191,7 @@ const AddBlog = () => {
                 <FormItem className='w-200'>
                   <FormLabel>Blog Content</FormLabel>
                   <FormControl>
-                     <Editor props={{initalData:'',onChange:handleEditorData}}/>
+                     <Editor props={{initialData:'',onChange:handleEditorData}}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
